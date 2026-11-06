@@ -85,9 +85,10 @@ def decode_tiny_link(code: str) -> str:
     """Decode a Confluence tiny link code (/x/<code>) into a page ID.
 
     Confluence encodes the page ID as little-endian bytes in base64 with
-    '+' -> '_' and '/' -> '-', trailing padding removed.
+    '+' -> '_' and '/' -> '-'; trailing zero bytes (encoded as 'A') and the
+    '=' padding are stripped, so the code is padded back with 'A'.
     """
-    padded = code + "=" * (-len(code) % 4)
+    padded = code + "A" * (-len(code) % 4)
     raw = base64.b64decode(padded, altchars=b"_-")
     return str(int.from_bytes(raw, "little"))
 

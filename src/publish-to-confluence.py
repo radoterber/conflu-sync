@@ -767,10 +767,11 @@ def plan_attachments(api: ConfluenceApi | None, page_id: str | None,
         m = _HASH_RE.search(ext.get("comment") or "")
         if m:
             same = m.group(1) == sha
-        elif int(ext.get("fileSize") or -1) != long_path(path).stat().st_size:
-            same = False
         else:
-            # same size, no stored hash (e.g. uploaded manually): compare content
+            # No stored hash (uploaded manually / by an older script version):
+            # compare content. The fileSize metadata is not reliable (Confluence
+            # sometimes reports a different size than the stored file), so it
+            # is not used to decide.
             import hashlib
             link = (att.get("_links") or {}).get("download", "")
             same = bool(link) and hashlib.sha256(api.download_bytes(link)).hexdigest() == sha
